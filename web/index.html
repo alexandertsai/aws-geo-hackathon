@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sheltered Steps</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c2230;--muted:#5d6675;--line:#e3e7ee;--card:rgba(255,255,255,.92);
+  --covered:#0f9d8a;--uncovered:#c9a227;--steps:#d9483b;--ramp:#7b61ff;--road:#8a94a6;
+  --propose:#ff7a00;--shortest:#5b6b85;--best:#0b7cff;--aac:#e0457b;
+  --r:18px;--shadow:0 12px 40px rgba(20,30,50,.18);
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,sans-serif;color:var(--ink);font-size:14px}
+#map{position:absolute;inset:0}
+.card{position:absolute;background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:var(--r);box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.6)}
+#welcome{left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92vw);padding:28px 30px}
+#welcome h1{margin:0 0 8px;font-size:30px;font-weight:700;letter-spacing:-.4px}
+#welcome p{margin:0 0 18px;color:var(--muted);line-height:1.5;font-size:15px}
+.big{display:flex;gap:10px}
+.big button{flex:1;padding:14px 12px;border-radius:14px;border:1px solid var(--line);background:#fff;font:inherit;font-weight:600;font-size:15px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.big button:hover{border-color:#b9c3d3;background:#fafbfd}
+#panel[hidden]{display:none}
+#panel{left:16px;top:16px;width:380px;max-height:calc(100% - 32px);display:flex;flex-direction:column;overflow:hidden}
+#panel header{padding:16px 18px 10px;display:flex;align-items:center;justify-content:space-between}
+#panel header h2{margin:0;font-size:17px;font-weight:700}
+#panel .body{padding:0 18px 18px;overflow:auto}
+.step{margin:12px 0 0}
+.step label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+input[type=text],select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;font-size:14px;background:#fff}
+input[type=text]:focus,select:focus{outline:2px solid #bcd8ff;border-color:#9cc2ff}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.sugg{border:1px solid var(--line);border-radius:12px;margin-top:6px;overflow:hidden;background:#fff;max-height:180px;overflow-y:auto}
+.sugg div{padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--line)}
+.sugg div:last-child{border-bottom:0}
+.sugg div:hover{background:#f2f6fc}
+.chip{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;margin-right:4px}
+.aac-list{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+.aac{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff;cursor:pointer}
+.aac:hover,.aac.sel{border-color:var(--best);box-shadow:0 0 0 2px rgba(11,124,255,.12)}
+.aac .n{font-weight:600;font-size:14px}
+.aac .m{color:var(--muted);font-size:12px;margin-top:2px}
+.bar{height:6px;border-radius:4px;background:#eef1f5;overflow:hidden;margin-top:8px;display:flex}
+.bar i{display:block;height:100%}
+.routes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.route{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff;cursor:pointer}
+.route.on{border-color:var(--best);box-shadow:0 0 0 2px rgba(11,124,255,.12)}
+.route h4{margin:0 0 4px;font-size:13px;display:flex;align-items:center;gap:6px}
+.route h4 b{width:12px;height:4px;border-radius:2px;display:inline-block}
+.route .kv{font-size:12px;color:var(--muted);line-height:1.6}
+.route .kv strong{color:var(--ink)}
+.gaps{margin-top:12px}
+.gap{border-left:4px solid var(--propose);background:#fff7ef;border-radius:0 12px 12px 0;padding:8px 10px;margin-top:6px;font-size:13px;cursor:pointer}
+.gap.steps{border-left-color:var(--steps);background:#fdf1ef}
+.gap .t{font-weight:600}
+.gap .d{color:var(--muted);font-size:12px}
+.btn{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;font:inherit;font-weight:600;cursor:pointer;font-size:13px}
+.btn.primary{background:var(--best);color:#fff;border-color:var(--best)}
+.btn.small{padding:6px 10px;font-size:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#legend{right:16px;bottom:28px;padding:12px 14px;font-size:12px;min-width:200px}
+#legend div{display:flex;align-items:center;gap:8px;margin:4px 0}
+#legend i{width:22px;height:4px;border-radius:2px;display:inline-block}
+#legend label{display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}
+#toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);background:#1c2230;color:#fff;padding:10px 14px;border-radius:12px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:1}
+.tag{font-size:11px;color:var(--muted);background:#f0f3f8;border-radius:6px;padding:2px 6px}
+.marker-aac{width:26px;height:26px;border-radius:50% 50% 50% 0;background:var(--aac);transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);cursor:pointer}
+.marker-aac.dim{opacity:.35}
+.marker-aac.sel{background:var(--best);width:32px;height:32px}
+.marker-origin{width:18px;height:18px;border-radius:50%;background:#1c2230;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.maplibregl-popup-content{font-family:inherit;border-radius:12px;padding:10px 12px;font-size:13px}
+.slider{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.slider input{flex:1}
+@media (max-width:640px){#panel{width:calc(100% - 32px)}#legend{display:none}}
+</style>
+<link rel="stylesheet" href="senior.css?v=4">
+</head>
+<body>
+<div id="map"></div>
+
+<div id="welcome" class="card">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">↗</span> Sheltered Steps</div>
+  <div class="welcome-content"><span class="eyebrow">TOA PAYOH</span>
+  <h1>Choose an option</h1>
+  <div class="big">
+    <button id="btnResident" disabled><span class="role-symbol" aria-hidden="true">↗</span><span>I'm an elderly person<small>Help me get to a centre</small></span><span aria-hidden="true">→</span></button>
+    <button id="btnPlanner" disabled><span class="role-symbol" aria-hidden="true">▦</span><span>I'm a planner<small>Improve walks in the neighbourhood</small></span><span aria-hidden="true">→</span></button>
+  </div>
+  <p id="bootStatus" role="status">Loading the map…</p>
+  </div>
+</div>
+<div id="senior" hidden></div>
+<div id="mapTools" hidden><button id="overviewButton">↗ Whole walk</button><button id="viewButton" aria-pressed="true">3D view</button></div>
+<div id="mapCaption" hidden><span></span> Your suggested walk</div>
+<dialog id="mapsDialog" aria-labelledby="mapsTitle"><h2 id="mapsTitle">Open Google Maps?</h2><p>Google chooses its own route. It may include stairs or less shelter.</p><a id="googleGo" class="senior-button primary" target="_blank" rel="noopener">Open Google Maps ↗</a><button id="closeMaps" class="senior-button">Stay here</button></dialog>
+
+<div id="panel" class="card" hidden>
+  <header><h2 id="panelTitle">Plan a walk</h2><button class="btn small" id="btnHome">Home</button></header>
+  <div class="body" id="panelBody"></div>
+</div>
+
+<div id="legend" class="card">
+  <div><i style="background:var(--covered)"></i>Covered linkway / void deck</div>
+  <div><i style="background:var(--uncovered)"></i>Open-air footpath</div>
+  <div><i style="background:var(--steps)"></i>Stairs</div>
+  <div><i style="background:var(--ramp)"></i>Stairs with ramp or lift</div>
+  <div><i style="background:var(--propose);border-top:2px dashed var(--propose);height:0"></i>Proposed shelter</div>
+  <label><input type="checkbox" id="chkNet" checked> Show network</label>
+  <label style="border-top:0;padding-top:0"><input type="checkbox" id="chk3d" checked> 3D buildings</label>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js"></script>
+<script src="config.js" onerror="this.remove()"></script>
+<script>
+const F={COVERED:1,STEPS:2,RAMP:4,CROSSING:8,ROAD:16,BRIDGE:32,NOWC:64,ELEV:128};
+const AREA='toa_payoh';
+const WALK_SPEED=0.8; // m/s, typical older adult
+const WORKSHOPS=['Exercise and fitness','Arts and crafts','Digital skills','Karaoke and music','Health talks','Cooking','Gardening','Games and mahjong'];
+let G=null, map, originMarker=null, aacMarkers={}, origin=null, selectedAAC=null, mode='resident', routes=null, activeRoute='best';
+let strictStepFree=true, shelterWeight=1.0;
+
+const toast=(m)=>{const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2600);};
+const fmtM=(m)=>m>=1000?(m/1000).toFixed(2)+' km':Math.round(m)+' m';
+const fmtT=(m)=>{const s=m/WALK_SPEED;return Math.round(s/60)+' min';};
+function hash(s){let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))|0;return Math.abs(h);}
+function workshopsFor(a){const h=hash(a.id);const n=3+(h%3);const out=[];for(let i=0;i<WORKSHOPS.length;i++)if(((h>>i)&1)&&out.length<n)out.push(WORKSHOPS[i]);if(out.length<3)out.push(...WORKSHOPS.filter(w=>!out.includes(w)).slice(0,3-out.length));return out;}
+
+/* ---------- graph + routing ---------- */
+function buildAdj(){G.adj=Array.from({length:G.nodes.length},()=>[]);G.edges.forEach((e,i)=>{G.adj[e[0]].push(i);G.adj[e[1]].push(i);});}
+function nearestNode(lng,lat){let best=-1,bd=1e18;const cl=Math.cos(lat*Math.PI/180);for(let i=0;i<G.nodes.length;i++){const n=G.nodes[i];const dx=(n[0]-lng)*cl,dy=n[1]-lat;const d=dx*dx+dy*dy;if(d<bd){bd=d;best=i;}}return best;}
+function edgeCost(e,profile){
+  const L=e[2],f=e[3];
+  if(profile==='shortest'){return L*(f&F.ROAD?1.15:1)*(f&F.STEPS?1.05:1);}
+  let c=L;
+  if(f&F.STEPS){ if(f&F.RAMP||f&F.ELEV) c*=1.3; else if(strictStepFree) return Infinity; else c*=8; }
+  if(f&F.NOWC){if(mode==='resident'&&strictStepFree)return Infinity;c*=3;}
+  if(!(f&F.COVERED)) c*=1+1.4*shelterWeight; // walking 1 m uncovered ~ 2.4 m covered when shelter matters most
+  if(f&F.ROAD) c*=1.6;
+  if(f&F.CROSSING) c+=25;
+  return c;
+}
+function dijkstra(src,dst,profile){
+  const N=G.nodes.length,dist=new Float64Array(N).fill(Infinity),prev=new Int32Array(N).fill(-1),prevE=new Int32Array(N).fill(-1);
+  const heap=[[0,src]];dist[src]=0;
+  const push=(x)=>{heap.push(x);let i=heap.length-1;while(i>0){const p=(i-1)>>1;if(heap[p][0]<=heap[i][0])break;[heap[p],heap[i]]=[heap[i],heap[p]];i=p;}};
+  const pop=()=>{const top=heap[0],last=heap.pop();if(heap.length){heap[0]=last;let i=0;for(;;){let l=2*i+1,r=l+1,m=i;if(l<heap.length&&heap[l][0]<heap[m][0])m=l;if(r<heap.length&&heap[r][0]<heap[m][0])m=r;if(m===i)break;[heap[m],heap[i]]=[heap[i],heap[m]];i=m;}}return top;};
+  while(heap.length){const [d,u]=pop();if(d>dist[u])continue;if(u===dst)break;
+    for(const ei of G.adj[u]){const e=G.edges[ei];const v=e[0]===u?e[1]:e[0];const c=edgeCost(e,profile);if(!isFinite(c))continue;const nd=d+c;if(nd<dist[v]){dist[v]=nd;prev[v]=u;prevE[v]=ei;push([nd,v]);}}}
+  if(!isFinite(dist[dst]))return null;
+  const path=[],eds=[];for(let v=dst;v!==src;v=prev[v]){path.push(v);eds.push(prevE[v]);}path.push(src);path.reverse();eds.reverse();
+  return {path,eds,cost:dist[dst]};
+}
+function summarize(r){
+  let L=0,cov=0,steps=0,stepsLen=0,stepFlights=0,road=0,cross=0,lastStepWay=null;
+  const segs=[];
+  r.eds.forEach((ei,i)=>{const e=G.edges[ei];const f=e[3];L+=e[2];if(f&F.COVERED)cov+=e[2];if(f&F.ROAD)road+=e[2];if(f&F.CROSSING)cross++;
+    if(f&F.STEPS&&!(f&F.RAMP)&&!(f&F.ELEV)){stepsLen+=e[2];if(e[4]!==lastStepWay){stepFlights++;lastStepWay=e[4];}}else lastStepWay=null;
+    const a=r.path[i],b=r.path[i+1];
+    const kind=(f&F.STEPS)?((f&F.RAMP||f&F.ELEV)?'ramp':'steps'):(f&F.COVERED)?'covered':'open';
+    const last=segs[segs.length-1];
+    if(last&&last.kind===kind){last.coords.push(G.nodes[b]);last.len+=e[2];last.ways.add(e[4]);}
+    else segs.push({kind,coords:[G.nodes[a],G.nodes[b]],len:e[2],ways:new Set([e[4]])});
+  });
+  return {len:L,covered:cov,coveredPct:L?cov/L:0,stepFlights,stepsLen,road,crossings:cross,segs};
+}
+function gapsFor(s){
+  const gaps=[];
+  s.segs.forEach((seg,i)=>{
+    if(seg.kind==='open'&&seg.len>=25){const w=[...seg.ways].map(id=>G.ways[id]).find(x=>x&&x.name);gaps.push({type:'shelter',len:seg.len,coords:seg.coords,title:`Covered linkway, ${fmtM(seg.len)}`,detail:(w?`along ${w.name}`:'unnamed footpath')+`; ${Math.round(seg.len/3.5)} standard shelter bays`,idx:i});}
+    if(seg.kind==='steps'){const w=[...seg.ways].map(id=>G.ways[id]).find(Boolean)||{};gaps.push({type:'steps',len:seg.len,coords:seg.coords,title:`Ramp or lift at stairs${w.step_count?` (${w.step_count} steps)`:''}`,detail:`${w.handrail==='yes'?'has handrail':'no handrail tagged'}; ${w.step_count?`1:12 ramp needs ~${Math.round(w.step_count*0.15*12)} m run`:'step count unknown, survey needed'}`,idx:i});}
+  });
+  return gaps;
+}
+
+/* ---------- map ---------- */
+function initMap(){
+  map=new maplibregl.Map({container:'map',style:'https://tiles.openfreemap.org/styles/liberty',center:[103.849,1.335],zoom:15.2,pitch:50,bearing:-15,attributionControl:{compact:true}});
+  map.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'top-right');
+  map.on('load',()=>{
+    const layers=map.getStyle().layers;const labelId=layers.find(l=>l.type==='symbol'&&l.layout&&l.layout['text-field'])?.id;
+    map.addSource('bld',{type:'geojson',data:G.buildings});
+    map.addLayer({id:'bld3d',type:'fill-extrusion',source:'bld',paint:{'fill-extrusion-color':['interpolate',['linear'],['get','h'],4,'#e9ecf1',40,'#cdd4de'],'fill-extrusion-height':['get','h'],'fill-extrusion-opacity':.85}},labelId);
+    map.addSource('net',{type:'geojson',data:networkGeo()});
+    map.addLayer({id:'net-open',type:'line',source:'net',filter:['==',['get','k'],'open'],paint:{'line-color':'#c9a227','line-width':1.4,'line-opacity':.7}},labelId);
+    map.addLayer({id:'net-cov',type:'line',source:'net',filter:['==',['get','k'],'covered'],paint:{'line-color':'#0f9d8a','line-width':3,'line-opacity':.9}},labelId);
+    map.addLayer({id:'net-steps',type:'line',source:'net',filter:['==',['get','k'],'steps'],paint:{'line-color':'#d9483b','line-width':3.5}},labelId);
+    map.addLayer({id:'net-ramp',type:'line',source:'net',filter:['==',['get','k'],'ramp'],paint:{'line-color':'#7b61ff','line-width':3.5}},labelId);
+    map.addSource('route',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    map.addLayer({id:'route-casing',type:'line',source:'route',filter:['==',['get','role'],'active'],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#fff','line-width':11,'line-opacity':.9}});
+    map.addLayer({id:'route-alt',type:'line',source:'route',filter:['==',['get','role'],'alt'],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#5b6b85','line-width':4,'line-dasharray':[1,1.2],'line-opacity':.8}});
+    map.addLayer({id:'route-active',type:'line',source:'route',filter:['==',['get','role'],'active'],layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['match',['get','k'],'covered','#0f9d8a','steps','#d9483b','ramp','#7b61ff','#c9a227'],'line-width':6}});
+    map.addSource('propose',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
+    map.addLayer({id:'propose-glow',type:'line',source:'propose',layout:{'line-cap':'round'},paint:{'line-color':'#ff7a00','line-width':16,'line-opacity':.18,'line-blur':4}});
+    map.addLayer({id:'propose',type:'line',source:'propose',layout:{'line-cap':'round'},paint:{'line-color':'#ff7a00','line-width':5,'line-dasharray':[1.4,1]}});
+    map.addLayer({id:'propose-pt',type:'circle',source:'propose',filter:['==',['geometry-type'],'Point'],paint:{'circle-radius':9,'circle-color':'#ff7a00','circle-stroke-color':'#fff','circle-stroke-width':2.5}});
+    addAACMarkers();
+    setMapMode();
+    map.on('click',(ev)=>{if(mode!=='planner')return;if(document.getElementById('panel').hidden)return;if(ev.originalEvent.target.closest('.marker-aac'))return;setOrigin(ev.lngLat.lng,ev.lngLat.lat,'Point on map');});
+    ['net-cov','net-steps','net-ramp','net-open'].forEach(id=>{map.on('mouseenter',id,()=>map.getCanvas().style.cursor='pointer');map.on('mouseleave',id,()=>map.getCanvas().style.cursor='');map.on('click',id,(e)=>{const p=e.features[0].properties;new maplibregl.Popup({closeButton:false}).setLngLat(e.lngLat).setHTML(`<b>${p.name||p.hw}</b><br><span class="tag">${p.k}</span> ${p.step_count?`<span class="tag">${p.step_count} steps</span>`:''} ${p.handrail?`<span class="tag">handrail ${p.handrail}</span>`:''}<br><small>OSM way ${p.id}</small>`).addTo(map);});});
+  });
+  document.getElementById('chkNet').onchange=(e)=>['net-open','net-cov','net-steps','net-ramp'].forEach(id=>map.setLayoutProperty(id,'visibility',e.target.checked?'visible':'none'));
+  document.getElementById('chk3d').onchange=(e)=>map.setLayoutProperty('bld3d','visibility',e.target.checked?'visible':'none');
+}
+function networkGeo(){
+  const byWay={};
+  G.edges.forEach(e=>{(byWay[e[4]]??=[]).push(e);});
+  const feats=[];
+  for(const [wid,eds] of Object.entries(byWay)){const w=G.ways[wid];const f=w.flags;if(f&F.ROAD)continue;const k=(f&F.STEPS)?((f&F.RAMP)?'ramp':'steps'):(f&F.COVERED)?'covered':'open';
+    // chain edges into lines
+    for(const e of eds)feats.push({type:'Feature',properties:{k,id:wid,name:w.name,hw:w.hw,step_count:w.step_count,handrail:w.handrail},geometry:{type:'LineString',coordinates:[G.nodes[e[0]],G.nodes[e[1]]]}});}
+  return {type:'FeatureCollection',features:feats};
+}
+function addAACMarkers(){
+  G.aacs.forEach(a=>{const el=document.createElement('div');el.className='marker-aac';el.title=a.name;el.onclick=(ev)=>{ev.stopPropagation();selectAAC(a.id);};
+    const m=new maplibregl.Marker({element:el,anchor:'bottom',offset:[0,-4]}).setLngLat([a.lng,a.lat]).addTo(map);aacMarkers[a.id]={m,el};});
+}
+function setOrigin(lng,lat,label){
+  origin={lng,lat,label,node:nearestNode(lng,lat)};
+  if(!originMarker){const el=document.createElement('div');el.className='marker-origin';originMarker=new maplibregl.Marker({element:el,draggable:true}).setLngLat([lng,lat]).addTo(map);originMarker.on('dragend',()=>{const p=originMarker.getLngLat();setOrigin(p.lng,p.lat,'Dragged point');});}
+  else originMarker.setLngLat([lng,lat]);
+  document.getElementById('originLabel')&&(document.getElementById('originLabel').textContent=label);
+  if(mode==='resident')rankAACs();else if(selectedAAC)computeRoutes();
+}
+function selectAAC(id){if(mode==='resident'){if(origin)seniorRoute(id);return;}selectedAAC=G.aacs.find(a=>a.id===id);Object.entries(aacMarkers).forEach(([k,v])=>v.el.classList.toggle('sel',k===id));if(origin)computeRoutes();else{toast('Set a starting point first');}}
+
+/* ---------- panel: resident flow ---------- */
+function showPanel(title){document.getElementById('welcome').hidden=true;const p=document.getElementById('panel');p.hidden=false;document.getElementById('panelTitle').textContent=title;}
+function residentPanel(){ seniorStart(); }
+
+function wireSearch(){
+  const q=document.getElementById('q'),sg=document.getElementById('sugg');let t;
+  q.oninput=()=>{clearTimeout(t);const v=q.value.trim();if(v.length<3){sg.hidden=true;return;}t=setTimeout(async()=>{
+    try{const r=await fetch(`https://www.onemap.gov.sg/api/common/elastic/search?searchVal=${encodeURIComponent(v)}&returnGeom=Y&getAddrDetails=Y&pageNum=1`,window.ONEMAP_TOKEN?{headers:{Authorization:window.ONEMAP_TOKEN}}:{});const j=await r.json();
+      const res=(j.results||[]).slice(0,8);sg.innerHTML=res.length?res.map((x,i)=>`<div data-i="${i}">${x.ADDRESS}</div>`).join(''):'<div>No results</div>';sg.hidden=false;
+      sg.querySelectorAll('div[data-i]').forEach(d=>d.onclick=()=>{const x=res[+d.dataset.i];const lng=+x.LONGITUDE,lat=+x.LATITUDE;const [w,s,e,n]=G.bbox;if(lng<w||lng>e||lat<s||lat>n)toast('Outside the Toa Payoh pilot area; routing uses the nearest network node.');setOrigin(lng,lat,x.ADDRESS);map.flyTo({center:[lng,lat],zoom:16.5});sg.hidden=true;q.value=x.ADDRESS;});
+    }catch(err){sg.innerHTML='<div>OneMap search unavailable</div>';sg.hidden=false;}},280);};
+}
+function rankAACs(){
+  const box=document.getElementById('aacs');if(!box||!origin)return;
+  const ws=document.getElementById('ws')?.value||'';
+  const cands=G.aacs.filter(a=>!ws||workshopsFor(a).includes(ws));
+  const rows=cands.map(a=>{const dst=nearestNode(a.lng,a.lat);const best=dijkstra(origin.node,dst,'best');const sh=dijkstra(origin.node,dst,'shortest');
+    return {a,best:best&&summarize(best),sh:sh&&summarize(sh)};}).filter(r=>r.sh&&r.sh.len<2500);
+  rows.sort((x,y)=>{const sx=x.best?x.best.len*(1+(1-x.best.coveredPct))+x.best.stepFlights*300:1e9;const sy=y.best?y.best.len*(1+(1-y.best.coveredPct))+y.best.stepFlights*300:1e9;return sx-sy;});
+  Object.values(aacMarkers).forEach(v=>v.el.classList.add('dim'));rows.forEach(r=>aacMarkers[r.a.id].el.classList.remove('dim'));
+  box.innerHTML=rows.length?rows.slice(0,8).map(r=>{const b=r.best;return `<div class="aac ${selectedAAC&&selectedAAC.id===r.a.id?'sel':''}" data-id="${r.a.id}">
+    <div class="n">${r.a.name}</div>
+    <div class="m">${b?`${fmtM(b.len)} sheltered route, ${fmtT(b.len)} · ${Math.round(b.coveredPct*100)}% under cover · ${b.stepFlights?b.stepFlights+' stair flight'+(b.stepFlights>1?'s':''):'step-free'}`:`No step-free route found (shortest ${fmtM(r.sh.len)})`}</div>
+    <div class="m">${workshopsFor(r.a).map(w=>`<span class="chip" style="background:${w===ws?'#dbeafe':'#f0f3f8'}">${w}</span>`).join('')}</div>
+    ${b?`<div class="bar"><i style="width:${b.coveredPct*100}%;background:var(--covered)"></i><i style="flex:1;background:#e9d9a0"></i></div>`:''}</div>`;}).join(''):'<div class="hint">No centres within 2.5 km walking.</div>';
+  box.querySelectorAll('.aac').forEach(d=>d.onclick=()=>selectAAC(d.dataset.id));
+}
+
+/* ---------- routes + proposals ---------- */
+function computeRoutes(){
+  const dst=nearestNode(selectedAAC.lng,selectedAAC.lat);
+  const best=dijkstra(origin.node,dst,'best'),sh=dijkstra(origin.node,dst,'shortest');
+  routes={best:best&&{r:best,s:summarize(best)},shortest:sh&&{r:sh,s:summarize(sh)}};
+  activeRoute=routes.best?'best':'shortest';
+  if(!routes.best&&!routes.shortest){toast('No route found in the network');return;}
+  if(!routes.best){activeRoute='shortest';toast('No fully step-free route; showing the shortest walk and the stairs to fix.');}
+  drawRoutes();renderRouteBox();
+  document.getElementById('routeBox')?.scrollIntoView({behavior:'smooth',block:'start'});
+  const coords=(routes[activeRoute].r.path).map(i=>G.nodes[i]);const b=coords.reduce((bb,c)=>bb.extend(c),new maplibregl.LngLatBounds(coords[0],coords[0]));
+  map.fitBounds(b,{padding:window.innerWidth<700?{left:30,top:300,right:30,bottom:40}:{left:420,top:60,right:60,bottom:80},pitch:45,maxZoom:17});
+}
+function drawRoutes(){
+  const feats=[];
+  for(const k of ['best','shortest']){const R=routes[k];if(!R)continue;const role=k===activeRoute?'active':'alt';
+    if(role==='alt')feats.push({type:'Feature',properties:{role},geometry:{type:'LineString',coordinates:R.r.path.map(i=>G.nodes[i])}});
+    else R.s.segs.forEach(sg=>feats.push({type:'Feature',properties:{role,k:sg.kind},geometry:{type:'LineString',coordinates:sg.coords}}));}
+  map.getSource('route').setData({type:'FeatureCollection',features:feats});
+  const gaps=gapsFor(routes[activeRoute].s);
+  map.getSource('propose').setData({type:'FeatureCollection',features:gaps.map(g=>g.type==='shelter'?{type:'Feature',properties:{t:g.type},geometry:{type:'LineString',coordinates:g.coords}}:{type:'Feature',properties:{t:g.type},geometry:{type:'Point',coordinates:g.coords[Math.floor(g.coords.length/2)]}})});
+  routes[activeRoute].gaps=gaps;
+}
+function renderRouteBox(){
+  const box=document.getElementById('routeBox')||document.getElementById('plannerRoute');if(!box)return;
+  const card=(k,title,color)=>{const R=routes[k];if(!R)return `<div class="route"><h4><b style="background:${color}"></b>${title}</h4><div class="kv">No route without stairs.<br>Untick "avoid all stairs" to see it.</div></div>`;const s=R.s;
+    return `<div class="route ${activeRoute===k?'on':''}" data-k="${k}"><h4><b style="background:${color}"></b>${title}</h4><div class="kv"><strong>${fmtM(s.len)}</strong> · ${fmtT(s.len)}<br><strong>${Math.round(s.coveredPct*100)}%</strong> under cover<br><strong>${s.stepFlights}</strong> stair flight${s.stepFlights===1?'':'s'} · ${s.crossings} crossings</div></div>`;};
+  const gaps=routes[activeRoute].gaps||[];
+  const shelterM=gaps.filter(g=>g.type==='shelter').reduce((a,g)=>a+g.len,0);const nSteps=gaps.filter(g=>g.type==='steps').length;
+  box.innerHTML=`<div class="step"><label>Route to ${selectedAAC.name}</label>
+    <div class="hint">${selectedAAC.address}${selectedAAC.hours?` · ${selectedAAC.hours}`:''}</div>
+    <div class="routes">${card('best','Sheltered and step-free','#0b7cff')}${card('shortest','Shortest walk','#5b6b85')}</div></div>
+    <div class="gaps"><label style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">What SLA / LTA would need to build</label>
+    <div class="hint">${gaps.length?`${fmtM(shelterM)} of new covered linkway${nSteps?` and ${nSteps} ramp${nSteps>1?'s':''}`:''} would make this walk fully sheltered${strictStepFree&&activeRoute==='best'?'':' and step-free'}.`:'This walk is already fully sheltered and step-free.'}</div>
+    ${gaps.map((g,i)=>`<div class="gap ${g.type}" data-i="${i}"><div class="t">${g.title}</div><div class="d">${g.detail}</div></div>`).join('')}
+    ${gaps.length?`<div class="row" style="margin-top:10px"><button class="btn primary" id="btnExport">Copy proposal as GeoJSON</button></div>`:''}</div>`;
+  box.querySelectorAll('.route[data-k]').forEach(d=>d.onclick=()=>{activeRoute=d.dataset.k;drawRoutes();renderRouteBox();});
+  box.querySelectorAll('.gap').forEach(d=>d.onclick=()=>{const g=gaps[+d.dataset.i];const c=g.coords[Math.floor(g.coords.length/2)];map.flyTo({center:c,zoom:18.5,pitch:55});});
+  const ex=document.getElementById('btnExport');if(ex)ex.onclick=()=>{const fc={type:'FeatureCollection',features:gaps.map(g=>({type:'Feature',properties:{proposal:g.type==='shelter'?'covered_linkway':'ramp_or_lift',length_m:Math.round(g.len),title:g.title,detail:g.detail,serves_aac:selectedAAC.name,origin:origin.label},geometry:{type:'LineString',coordinates:g.coords}}))};navigator.clipboard.writeText(JSON.stringify(fc,null,1)).then(()=>toast('GeoJSON copied to clipboard'));};
+}
+
+/* ---------- planner flow ---------- */
+function plannerPanel(){
+  hideStreetPreview();mode='planner';window.speechSynthesis?.cancel();seniorState.request++;clearWalk();document.body.dataset.mode='planner';document.getElementById('senior').hidden=true;document.getElementById('mapTools').hidden=true;document.getElementById('mapCaption').hidden=true;setMapMode();showPanel('Network gaps around each centre');
+  const body=document.getElementById('panelBody');
+  body.innerHTML='<div class="hint">Scoring every centre by how much of the walking network within 400 m is sheltered and step-free.</div><div class="aac-list" id="plist"></div><div id="plannerRoute"></div>';
+  const [w0,s0,e0,n0]=G.bbox;const rows=G.aacs.filter(a=>a.lng>=w0&&a.lng<=e0&&a.lat>=s0&&a.lat<=n0).map(a=>{const src=nearestNode(a.lng,a.lat);const st=reach(src,400);return {a,...st};}).filter(r=>r.total>0).sort((x,y)=>x.covPct-y.covPct);
+  document.getElementById('plist').innerHTML=rows.map(r=>`<div class="aac" data-id="${r.a.id}"><div class="n">${r.a.name}</div>
+    <div class="m">${Math.round(r.covPct*100)}% of nearby paths covered · ${r.stairs} stair flights without ramp · ${fmtM(r.total)} walkable within 400 m</div>
+    <div class="bar"><i style="width:${r.covPct*100}%;background:var(--covered)"></i><i style="width:${r.stairPct*100}%;background:var(--steps)"></i><i style="flex:1;background:#e9d9a0"></i></div></div>`).join('');
+  document.getElementById('plist').querySelectorAll('.aac').forEach(d=>d.onclick=()=>{const a=G.aacs.find(x=>x.id===d.dataset.id);map.flyTo({center:[a.lng,a.lat],zoom:17,pitch:50});selectedAAC=a;Object.entries(aacMarkers).forEach(([k,v])=>v.el.classList.toggle('sel',k===a.id));toast('Click on the map to set a resident start point and see the route to '+a.name);});
+}
+function reach(src,maxM){
+  const N=G.nodes.length,dist=new Float64Array(N).fill(Infinity);dist[src]=0;const q=[src];let total=0,cov=0,stairs=0,stairLen=0;const seen=new Set();const seenW=new Set();
+  while(q.length){const u=q.shift();for(const ei of G.adj[u]){const e=G.edges[ei];if(e[3]&F.ROAD)continue;const v=e[0]===u?e[1]:e[0];const nd=dist[u]+e[2];if(nd<dist[v]&&nd<=maxM){dist[v]=nd;q.push(v);}
+    if(!seen.has(ei)&&dist[u]<=maxM){seen.add(ei);total+=e[2];if(e[3]&F.COVERED)cov+=e[2];if((e[3]&F.STEPS)&&!(e[3]&F.RAMP)){stairLen+=e[2];if(!seenW.has(e[4])){seenW.add(e[4]);stairs++;}}}}}
+  return {total,covPct:total?cov/total:0,stairs,stairPct:total?stairLen/total:0};
+}
+
+/* ---------- boot ---------- */
+window.addEventListener('DOMContentLoaded',()=>{
+fetch(`data/${AREA}.json`).then(r=>{if(!r.ok)throw new Error('Data unavailable');return r.json();}).then(g=>{G=g;buildAdj();initMap();
+  document.getElementById('btnResident').disabled=false;
+  document.getElementById('btnPlanner').disabled=false;
+  document.getElementById('bootStatus').textContent='Choose an option to begin';
+  document.getElementById('btnResident').onclick=residentPanel;
+  document.getElementById('btnPlanner').onclick=plannerPanel;
+  document.getElementById('btnHome').onclick=goHome;
+}).catch(()=>{document.getElementById('bootStatus').textContent='We could not load the neighbourhood. Please reload to try again.';});
+});
+</script>
+<script src="senior.js?v=4"></script>
+<script src="streetview.js?v=1"></script>
+</body>
+</html>

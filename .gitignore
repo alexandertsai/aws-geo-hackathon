@@ -1,0 +1,7 @@
+web/config.js
+.venv/
+.playwright-mcp/
+.DS_Store
+__pycache__/
+*.jpeg
+!docs/*.jpeg
