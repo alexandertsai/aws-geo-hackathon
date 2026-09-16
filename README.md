@@ -1,6 +1,6 @@
 This project is a part of the AWS SLA hackathon, with the objective being for Singapore students to create solutions using Onemap data and AWS integration. Our challenge statement is: how can we shape Singapore to a be a more aged-friendly place? 
 
-“Report missing shelter” appears on the elderly route overview and planner route details whenever the selected route has edges without mapped shelter. It opens a report with the start, destination, uncovered distance, and path coordinates, with a mock “Submit report” action and confirmation. The dialog is labelled as a demo; reports are not submitted to an agency or stored by the app. All uncovered edges are included, even stretches shorter than the planner's 25 m proposal threshold; missing map tags still need on-site verification.
+“Report a problem” appears on resident and planner route details, including fully sheltered routes. It offers missing shelter, stairs or missing ramps, blocked paths, uneven or damaged surfaces, unsafe crossings, and other problems, with location notes. Missing-shelter reports retain uncovered sections and coordinates internally; the user sees only the issue category and a field for their notes. Submission is a demo: reports are not sent or saved.
 
 
 Let's build a map that routes elderly to active aging centres for specific workshops they want to attend (https://www.aic.sg/Care-Services/Active-Ageing-Centres). We should make sure these routes have shelters and are step-free (have ramps).
@@ -61,6 +61,11 @@ The local `web/config.js` holds `window.GOOGLE_MAPS_EMBED_KEY` and remains ignor
 
 ### Nearby places
 
-The elderly activity screen, route overview, and walking preview offer one optional “Nearby places” button. It opens ATMs / Community centres, shows at most three results within 1 km of the starting point or current preview segment, and adds numbered map pins only while that screen is open. Distances are straight-line estimates, not accessible walking routes. The original selected walk is preserved. Google Maps directions use Google's own routing and the existing handoff notice.
+The elderly activity screen, route overview, and walking preview offer one optional “ATMs and CCs” button. It opens ATMs / Community centres, shows at most three results within 1 km of the starting point or current preview segment, and adds numbered map pins only while that screen is open. Distances are straight-line estimates, not accessible walking routes. The original selected walk is preserved. Google Maps directions use Google's own routing and the existing handoff notice.
 
 The OpenStreetMap snapshot in `web/data/nearby.json` includes 32 ATMs and four community clubs, refreshed on 14 Sep 2026. Refresh with `.venv/bin/python pipeline/fetch_nearby.py`. Duplicate community-club records at the same address and other types of community venues are excluded. Listings are not live availability or opening-status claims.
+
+
+### Nearby walking routes
+
+Nearby ATM and community-centre results now offer “Show walking route”, with a mapped path, estimated time, shelter percentage, and segment preview. Routes use the resident stair-avoidance rules and reject destinations outside the pilot or more than 120 m from the walking graph. Entrance connections remain unverified. The selected centre walk is retained and restored when returning. Google Maps directions include the search anchor as their origin and keep the existing route handoff notice.

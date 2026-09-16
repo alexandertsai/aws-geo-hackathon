@@ -23,6 +23,6 @@ body[data-street=true] #mapTools,body[data-street=true] #mapCaption,body[data-st
 .nearby-marker{width:44px;height:44px;border-radius:50%;background:#123c37;color:white;border:3px solid white;font:700 20px Inter,system-ui;box-shadow:0 3px 14px #123c3740;cursor:pointer}.nearby-marker.selected{background:#8a4800;outline:4px solid #f6d47b}.fine a{color:var(--green)}
 #shelterReportDialog{max-width:620px;max-height:calc(100dvh - 32px);overflow:auto}
 #shelterReportDialog label{display:block;font-size:18px;margin-bottom:8px}
-#shelterReportText{width:100%;height:210px;resize:vertical;padding:12px;border:1px solid #b8c8bd;border-radius:12px;font:inherit;font-size:16px;line-height:1.5}
-#shelterReportText:focus-visible{outline:4px solid #d18a00;outline-offset:2px}
 #shelterReportStatus:empty{display:none}
+
+#reportType,#reportNotes{width:100%;padding:12px;margin-bottom:18px;border:1px solid #b8c8bd;border-radius:12px;font:inherit;font-size:18px;min-height:52px}#reportNotes{min-height:100px;resize:vertical}#reportType:focus-visible,#reportNotes:focus-visible{outline:4px solid #d18a00;outline-offset:2px}

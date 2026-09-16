@@ -14,7 +14,7 @@ function shelterReportSections(route){
 }
 
 function shelterReportButton(route,className='senior-button'){
-  return route&&shelterReportSections(route).length?`<button class="${className}" data-shelter-report>Report missing shelter</button>`:'';
+  return route?`<button class="${className}" data-shelter-report>Report a problem</button>`:'';
 }
 
 function bindShelterReport(container,route){
@@ -22,15 +22,15 @@ function bindShelterReport(container,route){
   if(button)button.onclick=()=>openShelterReport(route);
 }
 
-function openShelterReport(route){
+function openShelterReport(route, start=origin, destination=selectedAAC){
   const sections=shelterReportSections(route);
-  if(!sections.length)return;
+
   const coordinate=point=>`${point[1].toFixed(6)}, ${point[0].toFixed(6)}`;
   const text=[
     'Missing shelter report',
-    `Starting point: ${origin.label} (${coordinate([origin.lng,origin.lat])})`,
-    `Destination: ${selectedAAC.name}`,
-    `Address: ${selectedAAC.address}`,
+    `Starting point: ${start.label} (${coordinate([start.lng,start.lat])})`,
+    `Destination: ${destination.name}`,
+    `Address: ${destination.address}`,
     `Route distance: ${fmtM(route.s.len)}`,
     `Distance without mapped shelter: ${fmtM(sections.reduce((sum,section)=>sum+section.len,0))}`,
     '',
@@ -43,17 +43,28 @@ function openShelterReport(route){
   const dialog=document.getElementById('shelterReportDialog');
   const preview=document.getElementById('shelterReportText');
   const status=document.getElementById('shelterReportStatus');
-  preview.value=text;
+  const type=document.getElementById('reportType');
+  const notes=document.getElementById('reportNotes');
+  type.value='shelter';notes.value='';
+  const update=()=>{
+    const title=type.options[type.selectedIndex].text;
+    preview.value=type.value==='shelter'?text:[title+' report',`Starting point: ${start.label}`,`Destination: ${destination.name}`,`Route distance: ${fmtM(route.s.len)}`,'','Describe the location and problem in the notes below.'].join('\n');
+    status.textContent='';submit.disabled=false;submit.textContent='Submit demo report';
+  };
+  type.onchange=update;
+  notes.oninput=()=>{status.textContent='';submit.disabled=false;submit.textContent='Submit demo report';};
   status.textContent='';
   const submit=document.getElementById('submitShelterReport');
   submit.disabled=false;
-  submit.textContent='Submit report';
+  submit.textContent='Submit demo report';
   submit.onclick=()=>{
+    if(type.value!=='shelter'&&!notes.value.trim()){status.textContent='Please describe the problem and where it is.';notes.focus();return;}
     submit.disabled=true;
-    submit.textContent='Submitted';
-    status.textContent='Report submitted. Thank you for reporting the missing shelter.';
+    submit.textContent='Demo complete';
+    status.textContent='Demo complete. Your report has not been sent or saved.';
     status.focus();
   };
+  update();
   dialog.showModal();
 }
 
