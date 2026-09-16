@@ -1,0 +1,367 @@
+{
+  "source": "OpenStreetMap contributors",
+  "sourceURL": "https://www.openstreetmap.org/copyright",
+  "updated": "2026-09-14",
+  "places": [
+    {
+      "id": "node/1615217626",
+      "kind": "atm",
+      "name": "POSB ATM",
+      "lat": 1.3400259,
+      "lng": 103.8538378,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4745410827",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3266218,
+      "lng": 103.8481235,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869130710",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3406547,
+      "lng": 103.853959,
+      "address": "212 Toa Payoh Lorong 8",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869130711",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.334986,
+      "lng": 103.857182,
+      "address": "20 Toa Payoh Lorong 7",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869130713",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.333635,
+      "lng": 103.850976,
+      "address": "181 Toa Payoh Lorong 4",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869130714",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3412261,
+      "lng": 103.8462721,
+      "address": "109 Toa Payoh Lorong 1",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869131503",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.334182,
+      "lng": 103.852108,
+      "address": "71 Toa Payoh Lorong 4",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869132435",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3269639,
+      "lng": 103.846478,
+      "address": "20 Ah Hood Road",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869132479",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3324235,
+      "lng": 103.848046,
+      "address": "Lorong 6 Toa Payoh",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869132480",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.34066,
+      "lng": 103.8543763,
+      "address": "212 Toa Payoh Lorong 8",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869132483",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3317764,
+      "lng": 103.8508282,
+      "address": "192 Lorong 4 Toa Payoh",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869132484",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3363242,
+      "lng": 103.8466108,
+      "address": "399 Toa Payoh Lorong 2",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869132485",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3412341,
+      "lng": 103.8454687,
+      "address": "111 Lorong 1 Toa Payoh",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869132486",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.338186,
+      "lng": 103.8443249,
+      "address": "128 Toa Payoh Lorong 1",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869132488",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3321922,
+      "lng": 103.8473064,
+      "address": "530 Lorong 6 Toa Payoh",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869133242",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3427918,
+      "lng": 103.8490149,
+      "address": "1000 Toa Payoh North",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869133675",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3321552,
+      "lng": 103.8574072,
+      "address": "260 Kim Keat Avenue",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869134329",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.34042,
+      "lng": 103.84522,
+      "address": "379 Lorong 1 Toa Payoh",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/4869134394",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3408507,
+      "lng": 103.8468313,
+      "address": "Braddell",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/5248689925",
+      "kind": "atm",
+      "name": "POSB ATM",
+      "lat": 1.3343101,
+      "lng": 103.8517542,
+      "address": "",
+      "hours": "24/7",
+      "access": ""
+    },
+    {
+      "id": "node/6499063404",
+      "kind": "atm",
+      "name": "OCBC Bank ATM",
+      "lat": 1.3269903,
+      "lng": 103.8466293,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/7056590783",
+      "kind": "atm",
+      "name": "DBS ATM",
+      "lat": 1.3269933,
+      "lng": 103.8466798,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/7079728822",
+      "kind": "atm",
+      "name": "POSB ATM",
+      "lat": 1.3266235,
+      "lng": 103.8481103,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/8627744371",
+      "kind": "atm",
+      "name": "OCBC Bank ATM",
+      "lat": 1.3323976,
+      "lng": 103.8479122,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/8627880695",
+      "kind": "atm",
+      "name": "UOB ATM",
+      "lat": 1.3329775,
+      "lng": 103.8474069,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/8627880698",
+      "kind": "atm",
+      "name": "Citibank ATM",
+      "lat": 1.3328672,
+      "lng": 103.8472251,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/8627880700",
+      "kind": "atm",
+      "name": "Maybank ATM",
+      "lat": 1.3329056,
+      "lng": 103.8474226,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/8627880707",
+      "kind": "atm",
+      "name": "POSB ATM",
+      "lat": 1.3326948,
+      "lng": 103.8472466,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/8627880708",
+      "kind": "atm",
+      "name": "OCBC Bank ATM",
+      "lat": 1.3329624,
+      "lng": 103.8472066,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/9457438293",
+      "kind": "community",
+      "name": "Toa Payoh West Community Club",
+      "lat": 1.3353521,
+      "lng": 103.8451611,
+      "address": "200 Lorong 2 Toa Payoh",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/9547639205",
+      "kind": "atm",
+      "name": "POSB ATM",
+      "lat": 1.3411734,
+      "lng": 103.8471673,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/9547683482",
+      "kind": "atm",
+      "name": "DBS ATM",
+      "lat": 1.3363619,
+      "lng": 103.8464688,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "node/12053284805",
+      "kind": "atm",
+      "name": "POSB ATM",
+      "lat": 1.3317809,
+      "lng": 103.8507445,
+      "address": "",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "way/169518582",
+      "kind": "community",
+      "name": "Toa Payoh East Community Club",
+      "lat": 1.3362702,
+      "lng": 103.8546973,
+      "address": "160 Lorong 6 Toa Payoh",
+      "hours": "Mo-Su 09:00-22:00; PH off",
+      "access": ""
+    },
+    {
+      "id": "way/169538533",
+      "kind": "community",
+      "name": "Toa Payoh South Community Club",
+      "lat": 1.3347356,
+      "lng": 103.8593791,
+      "address": "1999 Lorong 8 Toa Payoh",
+      "hours": "",
+      "access": ""
+    },
+    {
+      "id": "way/170402337",
+      "kind": "community",
+      "name": "Toa Payoh Central Community Club",
+      "lat": 1.3347864,
+      "lng": 103.8503294,
+      "address": "93 Toa Payoh Central",
+      "hours": "",
+      "access": ""
+    }
+  ]
+}

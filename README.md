@@ -1,5 +1,7 @@
 This project is a part of the AWS SLA hackathon, with the objective being for Singapore students to create solutions using Onemap data and AWS integration. Our challenge statement is: how can we shape Singapore to a be a more aged-friendly place? 
 
+“Report missing shelter” appears on the elderly route overview and planner route details whenever the selected route has edges without mapped shelter. It opens a report with the start, destination, uncovered distance, and path coordinates, with a mock “Submit report” action and confirmation. The dialog is labelled as a demo; reports are not submitted to an agency or stored by the app. All uncovered edges are included, even stretches shorter than the planner's 25 m proposal threshold; missing map tags still need on-site verification.
+
 
 Let's build a map that routes elderly to active aging centres for specific workshops they want to attend (https://www.aic.sg/Care-Services/Active-Ageing-Centres). We should make sure these routes have shelters and are step-free (have ramps).
 Otherwise, we should propose to SLA for routes that don't exist (shelter/no step free routes)
@@ -52,6 +54,13 @@ The new experience is in `web/senior.js` and `web/senior.css`, using the existin
 
 ### Embedded Street View
 
-“Preview my walk” now opens interactive Google Street View in the app. Previous/Next selects each mapped route segment; “Show map” switches back to the 3D map. Centre details also offer an embedded view. Street View requests outdoor imagery within 50 m of each segment start; this may be a nearby street rather than the exact walking path. Missing imagery is handled by Google's viewer, with the map switch always available. This is not live navigation or a guarantee of imagery coverage.
+“Preview my walk” now opens interactive Google Street View in the app. Previous/Next selects each mapped route segment; “Show map” switches back to the 3D map. Centre details also offer an embedded view. Street View first fetches panorama metadata, rejects photos more than 35 m from the requested start or 18 m off the path, and pins the selected panorama ID. The heading is calculated from the actual camera location toward a point ahead, stopping the look-ahead at sharp turns. Photos beyond the current segment are rejected. Missing or unsuitable imagery automatically returns to the map; stale requests cannot reopen Street View after leaving. This is not live navigation or a guarantee of imagery coverage.
 
-The local `web/config.js` holds `window.GOOGLE_MAPS_EMBED_KEY` and remains ignored by Git. The dedicated key `sheltered-steps-local-embed` belongs to the existing Google Cloud project `telegram-to-do-469910`, permits only Maps Embed API, and is restricted to `http://localhost:8777/*` and `http://127.0.0.1:8777/*`. A future deployment needs its own allowed origin. No key is stored in the example configuration.
+The local `web/config.js` holds `window.GOOGLE_MAPS_EMBED_KEY` and remains ignored by Git. The dedicated key `sheltered-steps-local-embed` belongs to the existing Google Cloud project `telegram-to-do-469910`, permits Maps Embed API and Street View Static API (metadata requests only), and is restricted to `http://localhost:8777/*` and `http://127.0.0.1:8777/*`. A future deployment needs its own allowed origin. No key is stored in the example configuration.
+
+
+### Nearby places
+
+The elderly activity screen, route overview, and walking preview offer one optional “Nearby places” button. It opens ATMs / Community centres, shows at most three results within 1 km of the starting point or current preview segment, and adds numbered map pins only while that screen is open. Distances are straight-line estimates, not accessible walking routes. The original selected walk is preserved. Google Maps directions use Google's own routing and the existing handoff notice.
+
+The OpenStreetMap snapshot in `web/data/nearby.json` includes 32 ATMs and four community clubs, refreshed on 14 Sep 2026. Refresh with `.venv/bin/python pipeline/fetch_nearby.py`. Duplicate community-club records at the same address and other types of community venues are excluded. Listings are not live availability or opening-status claims.

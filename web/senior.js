@@ -20,14 +20,16 @@ function setMapMode(){
 }
 function goHome(){
   hideStreetPreview();
+  clearNearbyMarkers();
   seniorState.request++;window.speechSynthesis?.cancel();document.body.removeAttribute('data-mode');document.body.removeAttribute('data-step');
   document.getElementById('panel').hidden=true;document.getElementById('senior').hidden=true;document.getElementById('welcome').hidden=false;document.getElementById('mapTools').hidden=true;document.getElementById('mapCaption').hidden=true;
   clearWalk();setMapMode();map.easeTo({padding:{top:0,bottom:0,left:0,right:0},center:[103.849,1.335],zoom:15.2,pitch:50});document.getElementById('btnResident').focus();
 }
 function seniorShell(step,title,content,footer,back){
   hideStreetPreview();
+  clearNearbyMarkers();
   seniorState.request++;window.speechSynthesis?.cancel();seniorState.step=step;document.body.dataset.step=step;
-  document.getElementById('senior').innerHTML=`<div class="senior-top"><button id="seniorBack">← ${back?'Back':'Home'}</button><button class="listen" id="listenButton">◖ Listen</button></div><main class="senior-body"><div class="eyebrow">${step==='start'?'1 · YOUR START':step==='activity'?'2 · YOUR ACTIVITY':step==='choose'?'3 · YOUR CENTRE':step==='route'?'4 · YOUR WALK':'WALK PREVIEW'}</div><h1 tabindex="-1">${title}</h1>${content}</main><div class="senior-footer">${footer}</div>`;
+  document.getElementById('senior').innerHTML=`<div class="senior-top"><button id="seniorBack">← ${back?'Back':'Home'}</button><button class="listen" id="listenButton">◖ Listen</button></div><main class="senior-body"><div class="eyebrow">${step==='start'?'1 · YOUR START':step==='activity'?'2 · YOUR ACTIVITY':step==='choose'?'3 · YOUR CENTRE':step==='route'?'4 · YOUR WALK':step==='nearby'?'NEARBY PLACES':'WALK PREVIEW'}</div><h1 tabindex="-1">${title}</h1>${content}</main><div class="senior-footer">${footer}</div>`;
   document.getElementById('seniorBack').onclick=back||goHome;
   const listen=document.getElementById('listenButton');
   if(!('speechSynthesis' in window))listen.hidden=true;
@@ -81,8 +83,9 @@ const ACTIVITY_CHOICES=[
 ];
 function seniorActivities(){
   clearWalk();
-  seniorShell('activity','Choose an activity',`<div class="activity-grid">${ACTIVITY_CHOICES.map(([icon,label,value])=>`<button class="activity-choice" data-activity="${escapeHTML(value)}" aria-pressed="${seniorState.activity===value}"><span aria-hidden="true">${icon}</span><strong>${label}</strong></button>`).join('')}</div><button class="senior-button" id="anyActivity">Show all centres →</button>`,`Sample activities · Call the centre to confirm.`,seniorStart);
+  seniorShell('activity','Choose an activity',`<div class="activity-grid">${ACTIVITY_CHOICES.map(([icon,label,value])=>`<button class="activity-choice" data-activity="${escapeHTML(value)}" aria-pressed="${seniorState.activity===value}"><span aria-hidden="true">${icon}</span><strong>${label}</strong></button>`).join('')}</div><button class="senior-button" id="anyActivity">Show all centres →</button><button class="senior-button" id="nearbyButton">Nearby places</button>`,`Sample activities · Call the centre to confirm.`,seniorStart);
   document.querySelectorAll('[data-activity]').forEach(button=>button.onclick=()=>{seniorState.activity=button.dataset.activity;seniorChoose();});
+  document.getElementById('nearbyButton').onclick=()=>openNearby(seniorActivities);
   document.getElementById('anyActivity').onclick=()=>{seniorState.activity='';seniorChoose();};
 }
 function seniorChoose(){
@@ -106,8 +109,10 @@ function seniorRoute(id){
 }
 function seniorOverview(){
   const a=selectedAAC,s=routes.best.s;
-  seniorShell('route','Your walk',`<h2>${escapeHTML(centreName(a))}</h2><p>${escapeHTML(streetAddress(a))}</p><div class="trip-metrics"><div><strong>${minutes(s.len)} min</strong><span>estimated time</span></div><div><strong>${fmtM(s.len)}</strong><span>walking distance</span></div></div><div class="route-note"><b aria-hidden="true">✓</b> No stairs on the mapped path</div><div class="route-note"><b aria-hidden="true">⌂</b> ${Math.round(s.coveredPct*100)}% of the walk is sheltered</div><button class="senior-button primary" id="previewWalk">Preview my walk →</button><button class="senior-button" id="openMaps">Open Google Maps ↗</button><details><summary>Centre details</summary><p>${escapeHTML(a.name)}</p><p>${escapeHTML(a.address)}</p>${seniorState.activity?`<p>${escapeHTML(seniorState.activity)} · Sample listing. Call to confirm availability.</p>`:''}${a.hours?`<p>${escapeHTML(a.hours.replace(/&amp;/g,'&'))}</p>`:''}${a.phone?`<a class="senior-button" href="tel:${a.phone.replace(/[^+\d]/g,'')}">Call the centre</a>`:''}<button class="senior-button" id="centreStreet">See the centre in Street View</button></details>`,`Map information may be incomplete. Check paths and crossings as you go.`,seniorChoose);
+  seniorShell('route','Your walk',`<h2>${escapeHTML(centreName(a))}</h2><p>${escapeHTML(streetAddress(a))}</p><div class="trip-metrics"><div><strong>${minutes(s.len)} min</strong><span>estimated time</span></div><div><strong>${fmtM(s.len)}</strong><span>walking distance</span></div></div><div class="route-note"><b aria-hidden="true">✓</b> No stairs on the mapped path</div><div class="route-note"><b aria-hidden="true">⌂</b> ${Math.round(s.coveredPct*100)}% of the walk is sheltered</div>${shelterReportButton(routes.best)}<button class="senior-button primary" id="previewWalk">Preview my walk →</button><button class="senior-button" id="openMaps">Open Google Maps ↗</button><button class="senior-button" id="nearbyButton">Nearby places</button><details><summary>Centre details</summary><p>${escapeHTML(a.name)}</p><p>${escapeHTML(a.address)}</p>${seniorState.activity?`<p>${escapeHTML(seniorState.activity)} · Sample listing. Call to confirm availability.</p>`:''}${a.hours?`<p>${escapeHTML(a.hours.replace(/&amp;/g,'&'))}</p>`:''}${a.phone?`<a class="senior-button" href="tel:${a.phone.replace(/[^+\d]/g,'')}">Call the centre</a>`:''}<button class="senior-button" id="centreStreet">See the centre in Street View</button></details>`,`Map information may be incomplete. Check paths and crossings as you go.`,seniorChoose);
+  bindShelterReport(document.getElementById('senior'),routes.best);
   document.getElementById('previewWalk').onclick=()=>{seniorState.part=0;seniorState.street=true;seniorWalk();};document.getElementById('openMaps').onclick=openGoogleMaps;
+  document.getElementById('nearbyButton').onclick=()=>openNearby(seniorOverview);
   document.getElementById('centreStreet').onclick=()=>showStreetPreview([[a.lng,a.lat]],'Near the centre');
   drawSeniorRoute();fitSeniorRoute();
 }
@@ -125,10 +130,11 @@ function seniorWalk(){
   const segs=routes.best.s.segs,i=seniorState.part,segment=segs[i];
   const title={covered:'Under shelter',open:'An open-air stretch',ramp:'A ramp or lift',steps:'Stairs ahead'}[segment.kind];
   const name=[...segment.ways].map(w=>G.ways[w]?.name).find(Boolean);
-  seniorShell('walk',title,`<div class="walk-number" aria-hidden="true">${segment.kind==='covered'?'⌂':segment.kind==='ramp'?'↗':'↑'}</div><h2>${fmtM(segment.len)}${name?` along ${escapeHTML(name)}`:''}</h2><p>${segment.kind==='covered'?'This part is marked as sheltered.':segment.kind==='ramp'?'Look for the ramp or lift beside the steps.':'Bring an umbrella for sun or rain.'}</p><div class="walk-progress" aria-label="Part ${i+1} of ${segs.length}">${segs.map((_,n)=>`<i class="${n<=i?'done':''}"></i>`).join('')}</div><p class="fine">Part ${i+1} of ${segs.length} · Preview only</p><div class="button-pair"><button class="senior-button" id="previousPart" ${i===0?'disabled':''}>← Previous</button><button class="senior-button primary" id="nextPart">${i===segs.length-1?'Finish':'Next part →'}</button></div><button class="senior-button" id="toggleStreet">${seniorState.street?'Show map':'Show Street View'}</button><button class="senior-button" id="openMaps">Open Google Maps ↗</button>`,`Preview only. No imagery? Tap Show map.`,seniorOverview);
+  seniorShell('walk',title,`<div class="walk-number" aria-hidden="true">${segment.kind==='covered'?'⌂':segment.kind==='ramp'?'↗':'↑'}</div><h2>${fmtM(segment.len)}${name?` along ${escapeHTML(name)}`:''}</h2><p>${segment.kind==='covered'?'This part is marked as sheltered.':segment.kind==='ramp'?'Look for the ramp or lift beside the steps.':'Bring an umbrella for sun or rain.'}</p><div class="walk-progress" aria-label="Part ${i+1} of ${segs.length}">${segs.map((_,n)=>`<i class="${n<=i?'done':''}"></i>`).join('')}</div><p class="fine">Part ${i+1} of ${segs.length} · Preview only</p><div class="button-pair"><button class="senior-button" id="previousPart" ${i===0?'disabled':''}>← Previous</button><button class="senior-button primary" id="nextPart">${i===segs.length-1?'Finish':'Next part →'}</button></div><button class="senior-button" id="toggleStreet">${seniorState.street?'Show map':'Show Street View'}</button><button class="senior-button" id="openMaps">Open Google Maps ↗</button><button class="senior-button" id="nearbyButton">Nearby places</button>`,`Preview only. No imagery? Tap Show map.`,seniorOverview);
   document.getElementById('previousPart').onclick=()=>{seniorState.part--;seniorWalk();};document.getElementById('nextPart').onclick=()=>{if(i===segs.length-1)seniorOverview();else{seniorState.part++;seniorWalk();}};document.getElementById('openMaps').onclick=openGoogleMaps;
-  document.getElementById('toggleStreet').onclick=()=>{seniorState.street=!seniorState.street;seniorWalk();};
-  if(seniorState.street&&window.GOOGLE_MAPS_EMBED_KEY)showStreetPreview(segment.coords,`Street View · Part ${i+1} of ${segs.length}`);
+  document.getElementById('nearbyButton').onclick=()=>openNearby(seniorWalk);
+  document.getElementById('toggleStreet').onclick=()=>{seniorState.street=document.body.dataset.street!=='true';seniorWalk();};
+  if(seniorState.street&&window.GOOGLE_MAPS_EMBED_KEY)showStreetPreview(segs.slice(i).flatMap((s,n)=>n?s.coords.slice(1):s.coords),`Street View · Part ${i+1} of ${segs.length}`,segment.len);
   else document.getElementById('toggleStreet').textContent='Show Street View';
   const mid=segment.coords[Math.floor(segment.coords.length/2)];map.easeTo({center:mid,zoom:18.2,pitch:seniorState.view3d?55:0,padding:innerWidth<=700?{top:0,left:0,right:0,bottom:innerHeight*.59}:{top:0,left:470,right:0,bottom:0},duration:700});
 }
